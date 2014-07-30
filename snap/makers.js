@@ -30,6 +30,10 @@ MakerApp.Q = require('q');
 
 var SerialPort = require('serialport');
 
+process.on('uncaughtException', function (err) {
+	console.log("uncaughtException", err);
+});
+
 /*
  * Helper function that presents a Morph compatible dialog box with information (alert )
  *
@@ -229,6 +233,9 @@ MakerApp.openBoardConnection = function(port) {
 				//MakerApp.inform('An Arduino board has been connected at \nport '+port, world);
 				//alert('An Arduino board has been connected at port '+port);
 				console.log('An Arduino board has been connected. Happy prototyping!');
+				board.sp.on('disconnect', function(a) {alert("disconnect "+a)});
+				board.sp.options.disconnectedCallback = function() {alert("disc")};
+
 			}
 			MakerApp.state = null;
 		});		
@@ -254,6 +261,21 @@ MakerApp.closeBoardConnection = function() {
 	if ((typeof board !== 'undefined') && (board!==null)) {
 		var port = board.sp.path;
 
+		//MakerApp.serialPortSafeClose2(function(err) {
+		MakerApp.serialPortSafeClose2(function(err) {
+			if (err) {
+				deferred.reject(err);
+				//MakerApp.inform(err);
+			} else {
+				deferred.resolve(port)
+				//MakerApp.inform("closed");
+				MakerApp.oldboards.push(board);
+				board = null;
+			}
+
+			
+		})
+/*
 		// Check if serialport has 'disconnected' function which avoids closing errors
 		if (board.sp.disconnected) {
 			board.sp.disconnected(function(err) {
@@ -276,6 +298,7 @@ MakerApp.closeBoardConnection = function() {
 
 			}); 
 		}
+		*/
 
 		// Housekeeping - hide board in oldboards array (in case of active listeners)
 		MakerApp.oldboards.push(board);
@@ -362,6 +385,38 @@ MakerApp.serialPortSafeClose = function(sp, callback) {
       callback();
     }
 };
+
+MakerApp.serialPortSafeClose2 = function(callback) {
+
+	var sp = board.sp;
+	var factory = require('serialport');
+
+	sp.options.disconnectedCallback = function() {alert("disc")};
+
+
+    // clean up all other items
+    var fd = sp.fd;
+    try {
+      factory.SerialPortBinding.close(fd, function (err) {
+      	alert(err);
+      });
+    } catch (e) {
+    	alert(e);
+      //handle silently as we are just cleaning up the OS.
+    }
+
+    sp.removeAllListeners();
+    sp.fd = 0;
+
+    if (process.platform !== 'win32') {
+      sp.readable = false;
+      sp.serialPoller.close();
+    }
+
+    if (callback) {
+      callback();
+    }
+}
 
 /**
  * Functions for trasnforming analog values [0,1023] into measures

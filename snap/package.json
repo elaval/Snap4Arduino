@@ -5,7 +5,7 @@
   "window": {
     "title": "Snap4Arduino",
     "icon": "s4a.ico",
-    "toolbar": false,
+    "toolbar": true,
     "frame": true,
     "position": "mouse",
     "min_width": 960,
