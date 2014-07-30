@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		<title>Snap4Arduino Makers version 0.0.1-pre-alpha</title>
+		<title>Snap4Arduino 1.0.1-pre-alpha</title>
         <link rel="shortcut icon" href="http://snap.berkeley.edu/fav3.gif" type="image/gif">
 		<script type="text/javascript" src="morphic.js"></script>
 		<script type="text/javascript" src="widgets.js"></script>
@@ -45,7 +45,6 @@
 		<script type="text/javascript">
 			var board;
 			var firmata = require('firmata');
-			//MakerApp.makersStartArduinoAutoConnect();
 /*			process.on('uncaughtException' ,function(err){
         		console.error('uncaughtException:', err);
         		console.error(err.stack);
@@ -57,6 +56,9 @@
 				new IDE_Morph().openIn(world);
 				setInterval(loop, 1);
 			};
+
+			function inform(title, message) { (new DialogBoxMorph()).inform(title, message, world) };
+
 			function loop() {
 				world.doOneCycle();
 			}

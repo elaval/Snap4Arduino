@@ -744,6 +744,7 @@ Process.prototype.reifyPredicate = function (topBlock, parameterNames) {
 Process.prototype.reportJSFunction = function (parmNames, body) {
     return Function.apply(
         null,
+
         parmNames.asArray().concat([body])
     );
 };
