@@ -47,6 +47,29 @@ function overridenBlockTemplates(category) {
 		};
 	}
 
+	/**
+     * Starts a connection attempt to an Arduino Board
+     */
+    var arduinoConnectButton = new PushButtonMorph(
+            null,
+            function () {
+                MakerApp.makersStartArduinoAutoConnect();
+            },
+            "Connect Arduino"
+    );
+
+    /**
+     * Starts disconnection from an Arduino Board
+     */
+    var arduinoDisConnectButton = new PushButtonMorph(
+        null,
+        function () {
+            world.arduino.closeConnection(myself);
+        },
+        "Disconnect Arduino"
+    );
+
+
 	SpriteMorph.prototype.blocks.reportAnalogReading = 
 	{
        	type: 'reporter',
@@ -108,6 +131,8 @@ function overridenBlockTemplates(category) {
     }
 
 	if (category === 'arduino') {
+		blocks.push(arduinoConnectButton);
+        blocks.push(arduinoDisConnectButton);
         blocks.push(blockBySelector('connectArduino'));
 		blocks.push('-');
         blocks.push(blockBySelector('setPinMode'));
