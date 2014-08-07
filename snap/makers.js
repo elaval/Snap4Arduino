@@ -116,7 +116,9 @@ MakerApp.makersStartArduinoAutoConnect = function() {
 };
 
 MakerApp.isBoardConnected = function() {
-	return (typeof board !== 'undefined') && (board!== null) && (board.pins.length > 0);
+	var sprite = world.children[0].currentSprite;
+
+	return (typeof sprite.arduino.board !== 'undefined') && (sprite.arduino.board!== null) && (sprite.arduino.board.pins.length > 0);
 };
 
 MakerApp.makersStopArduinoAutoConnect = function() {
