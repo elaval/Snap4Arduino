@@ -51,6 +51,8 @@ MakerApp.inform = function(msg) {
  * every 30 seconds
  */
 MakerApp.makersStartArduinoAutoConnect = function() {
+	var sprite = world.children[0].currentSprite;
+	var board = sprite.arduino.board;
 
 	if (!MakerApp.connecting) {
 
@@ -117,11 +119,15 @@ MakerApp.makersStartArduinoAutoConnect = function() {
 
 MakerApp.isBoardConnected = function() {
 	var sprite = world.children[0].currentSprite;
+	var board = sprite.arduino.board;
 
-	return (typeof sprite.arduino.board !== 'undefined') && (sprite.arduino.board!== null) && (sprite.arduino.board.pins.length > 0);
+	return (typeof board !== 'undefined') && (board!== null) && (board.pins.length > 0);
 };
 
 MakerApp.makersStopArduinoAutoConnect = function() {
+	var sprite = world.children[0].currentSprite;
+	var board = sprite.arduino.board;
+
 	if (!MakerApp.connecting) {
 		var port = null;
 		if (board && board.sp) {
@@ -221,12 +227,14 @@ MakerApp.findCompatibleUSBPorts = function() {
  * @return {promise} promise for the new created board.
  */
 MakerApp.openBoardConnection = function(port) {
+	var sprite = world.children[0].currentSprite;
+
 	// User deferred promises to get th easync result
 	var deferred = MakerApp.Q.defer();
  
 	// If found, attempt connection (if global board is still not defined)
 	if (!MakerApp.isBoardConnected()) {
-		board = new firmata.Board(port, function(err) {
+		sprite.arduino.board = new firmata.Board(port, function(err) {
 			if (err) {
 				deferred.reject(err);
 				console.log(err);
@@ -256,6 +264,8 @@ MakerApp.openBoardConnection = function(port) {
  *
  */
 MakerApp.closeBoardConnection = function() {
+	var sprite = world.children[0].currentSprite;
+	var board = sprite.arduino.board;
 
 	// User deferred promises to get th easync result
 	var deferred = MakerApp.Q.defer();
@@ -320,6 +330,9 @@ MakerApp.closeBoardConnection = function() {
  * Attempt to create a board object (firmata connection) on the given port
  */
 MakerApp.makersAttemptToConnectArduino = function() {
+	var sprite = world.children[0].currentSprite;
+	var board = sprite.arduino.board;
+
 	if ((typeof board === 'undefined') || (board===null))  {
 
 		// First, try to find a compatible board
@@ -351,6 +364,9 @@ MakerApp.makersAttemptToConnectArduino = function() {
  * based on serialport 'diconnected' function which might not be implemented in all versions of serialport
  */ 
 MakerApp.serialPortSafeClose = function(sp, callback) {
+	var sprite = world.children[0].currentSprite;
+	var board = sprite.arduino.board;
+
     var self = sp;
     var fd = self.fd;
     var factory = require('serialport');
@@ -389,6 +405,9 @@ MakerApp.serialPortSafeClose = function(sp, callback) {
 };
 
 MakerApp.serialPortSafeClose2 = function(callback) {
+	var sprite = world.children[0].currentSprite;
+	var board = sprite.arduino.board;
+
 
 	var sp = board.sp;
 	var factory = require('serialport');

@@ -277,6 +277,7 @@ function overridenBlockTemplates(category) {
     };
 
     SpriteMorph.prototype.makersTemperature = function () {
+        var board = this.arduino.board;
         if (MakerApp.isBoardConnected()) {
             var val;
             var pin = 3;
@@ -292,6 +293,7 @@ function overridenBlockTemplates(category) {
     };
 
     SpriteMorph.prototype.makersLight = function () {
+        var board = this.arduino.board;
         if (MakerApp.isBoardConnected()) {
 
             var val;
@@ -309,6 +311,7 @@ function overridenBlockTemplates(category) {
     };
 
     SpriteMorph.prototype.makersAudio = function () {
+        var board = this.arduino.board;
         if (MakerApp.isBoardConnected()) {
 
             var val;
@@ -326,6 +329,7 @@ function overridenBlockTemplates(category) {
     };
 
     SpriteMorph.prototype.makersPotentiometer = function () {
+        var board = this.arduino.board;
         if (MakerApp.isBoardConnected()) {
 
             var val;
