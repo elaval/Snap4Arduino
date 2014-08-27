@@ -1,45 +1,42 @@
 'use strict';
 
 /**
- * MakerApp.twitter
+ * WorldMorph.prototype.makers.twitter
  * Functionality & variables for Twitter interaction from Makers blocks
  *
  * Defined in this file:
- * MakerApp.twitter.APIKey
- * MakerApp.twitter.APISecret
- * MakerApp.twitter.TwitterDialogMorph
- * MakerApp.twitter.requestPin
- * MakerApp.twitter.processPin
+ * WorldMorph.prototype.makers.twitter.APIKey
+ * WorldMorph.prototype.makers.twitter.APISecret
+ * WorldMorph.prototype.makers.twitter.TwitterDialogMorph
+ * WorldMorph.prototype.makers.twitter.requestPin
+ * WorldMorph.prototype.makers.twitter.processPin
  */
 
-// Make sure that global MakerApp object  exists
-if (typeof MakerApp === "undefined") {
-  var MakerApp = {};  
-}
+// Encapsulate all twitter functionality in WorldMorph.prototype.makers.twitter object 
+WorldMorph.prototype.makers.twitter = {
+};
 
-// Encapsulate all twitter functionality in MakerApp.twitter object 
-MakerApp.twitter = {}
 
 // APIKey & API Secret from Twitter Application associated to the Twitter API calls (by default it is FirstMakers APP that belongs to the firstmakers twitter account)
-MakerApp.twitter.APIKey = 'Y7nczrrpIbyCYbk8BXjOiFfjM',
-MakerApp.twitter.APISecret = 'FF35z7tBBJRo5ap8LBqSZcbGaQOMxdKd2ldHGc1PNY5PPNlbeK'
+WorldMorph.prototype.makers.twitter.APIKey = 'Y7nczrrpIbyCYbk8BXjOiFfjM',
+WorldMorph.prototype.makers.twitter.APISecret = 'FF35z7tBBJRo5ap8LBqSZcbGaQOMxdKd2ldHGc1PNY5PPNlbeK'
 
 /**
- * MakerApp.twitter.TwitterDialogMorph
+ * WorldMorph.prototype.makers.twitter.TwitterDialogMorph
  * DialogBox that informs the user of Browser authentication and requires
  * PIN generated for the Twitter Authetication process.
  */
-MakerApp.twitter.TwitterDialogMorph = function(target, action, environment) {
+WorldMorph.prototype.makers.twitter.TwitterDialogMorph = function(target, action, environment) {
     this.init(target, action, environment);
 }
 
-MakerApp.twitter.TwitterDialogMorph.prototype = new DialogBoxMorph();
-MakerApp.twitter.TwitterDialogMorph.prototype.constructor = MakerApp.twitter.TwitterDialogMorph;
-MakerApp.twitter.TwitterDialogMorph.uber = DialogBoxMorph.prototype;
+WorldMorph.prototype.makers.twitter.TwitterDialogMorph.prototype = new DialogBoxMorph();
+WorldMorph.prototype.makers.twitter.TwitterDialogMorph.prototype.constructor = WorldMorph.prototype.makers.twitter.TwitterDialogMorph;
+WorldMorph.prototype.makers.twitter.TwitterDialogMorph.uber = DialogBoxMorph.prototype;
 
 // TwitterDialogMorph instance creation:
 
-MakerApp.twitter.TwitterDialogMorph.prototype.init = function (target, action, environment) {
+WorldMorph.prototype.makers.twitter.TwitterDialogMorph.prototype.init = function (target, action, environment) {
      // initialize inherited properties:
     BlockDialogMorph.uber.init.call(
         this,
@@ -65,7 +62,7 @@ MakerApp.twitter.TwitterDialogMorph.prototype.init = function (target, action, e
 };
 
 
-MakerApp.twitter.TwitterDialogMorph.prototype.fixLayout = function () {
+WorldMorph.prototype.makers.twitter.TwitterDialogMorph.prototype.fixLayout = function () {
     var th = fontHeight(this.titleFontSize) + this.titlePadding * 2;
 
     if (this.body) {
@@ -116,78 +113,70 @@ MakerApp.twitter.TwitterDialogMorph.prototype.fixLayout = function () {
 };
 
 /**
- * MakerApp.twitter.requestPinrequestPin
+ * WorldMorph.prototype.makers.twitter.requestPinrequestPin
  * Uses twitter api to obtain a Request Token using oob (Out of Band) flow.
  * 
  * We will obtain a requestToken & requestSecret and then redirect the user 
  * to an external (local browser) web page for Twitter authentication/authorization
  * if successful, the page will provide the user a PIN number which can be used
- * later (in MakerApp.twitter.processPin) to obtain the accessToken that is 
+ * later (in WorldMorph.prototype.makers.twitter.processPin) to obtain the accessToken that is 
  * required for using the Twitter API on behalf of the user.
  */
-MakerApp.twitter.requestPin = function() {
+WorldMorph.prototype.makers.twitter.requestPin = function(callback) {
 	var gui = require('nw.gui');
     
-    // Using deferred for managing promises with async API calls
-    var deferred = MakerApp.Q.defer();
-
-	if (MakerApp.twitter.twitterAPI === undefined) {
+	if (WorldMorph.prototype.makers.twitter.twitterAPI === undefined) {
 		var twitterAPI = require('node-twitter-api');
-		MakerApp.twitter.twitterAPI = new twitterAPI({
-		    consumerKey: MakerApp.twitter.APIKey,
-		    consumerSecret: MakerApp.twitter.APISecret,
+		WorldMorph.prototype.makers.twitter.twitterAPI = new twitterAPI({
+		    consumerKey: WorldMorph.prototype.makers.twitter.APIKey,
+		    consumerSecret: WorldMorph.prototype.makers.twitter.APISecret,
 		    callback: 'oob'
 		});
 	}
 
-	MakerApp.twitter.twitterAPI.getRequestToken(function(error, requestToken, requestTokenSecret, results){
+	WorldMorph.prototype.makers.twitter.twitterAPI.getRequestToken(function(error, requestToken, requestTokenSecret, results){
 	    if (error) {
             console.log('Error getting OAuth request token : ' + error);
-            deferred.reject(new Error(error));
+            callback(new Error(error));
 	    } else {
 	    	console.log('Got request token from Twitter');
             // Records requestToken & requestTokenSecret for later use
-	    	MakerApp.twitter.requestToken = requestToken;
-	    	MakerApp.twitter.requestTokenSecret = requestTokenSecret;
+	    	WorldMorph.prototype.makers.twitter.requestToken = requestToken;
+	    	WorldMorph.prototype.makers.twitter.requestTokenSecret = requestTokenSecret;
 	    	
             gui.Shell.openExternal('https://twitter.com/oauth/authenticate?oauth_token='+requestToken);
-            deferred.resolve(results);
+            callback(null,results);
 	    }
 	});
 
-    return deferred.promise;
 }
 
 /**
- * MakerApp.twitter.processPin
- * Given an appropiate Twitter PIN (obtained through MakerApp.twitter.requestPin)
+ * WorldMorph.prototype.makers.twitter.processPin
+ * Given an appropiate Twitter PIN (obtained through WorldMorph.prototype.makers.twitter.requestPin)
  * we request an accessToken & accessTokenSecret which is required for calls to the twitter API
  */
-MakerApp.twitter.processPin = function(pin) {
+WorldMorph.prototype.makers.twitter.processPin = function(pin, callback) {
 
-    // Using deferred for managing promises with async API calls
-    var deferred = MakerApp.Q.defer();
-
-	if (MakerApp.twitter.requestToken === undefined) {
+	if (WorldMorph.prototype.makers.twitter.requestToken === undefined) {
 		alert('You need to request a twitter PIN before connecting');
 	} else
 	{
-		MakerApp.twitter.twitterAPI.getAccessToken(MakerApp.twitter.requestToken, MakerApp.twitter.requestTokenSecret, pin, function(error, accessToken, accessTokenSecret, results) {
+		WorldMorph.prototype.makers.twitter.twitterAPI.getAccessToken(WorldMorph.prototype.makers.twitter.requestToken, WorldMorph.prototype.makers.twitter.requestTokenSecret, pin, function(error, accessToken, accessTokenSecret, results) {
 		    if (error) {
 		        console.log(error);
-                deferred.reject(error);
+                callback(error);
 		    } else {
                 // Records requestToken & requestTokenSecret for later use
-		    	MakerApp.twitter.accessToken = accessToken;
-		    	MakerApp.twitter.accessTokenSecret = accessTokenSecret;
+		    	WorldMorph.prototype.makers.twitter.accessToken = accessToken;
+		    	WorldMorph.prototype.makers.twitter.accessTokenSecret = accessTokenSecret;
 		    	console.log('Got access token for Twritter account',results);
 		        //store accessToken and accessTokenSecret somewhere (associated to the user)
 		        //Step 4: Verify Credentials belongs here
-                deferred.resolve(results);
+                callback(null,results);
 		    }
 		});
 	}
 
-    return deferred.promise;
 }
 

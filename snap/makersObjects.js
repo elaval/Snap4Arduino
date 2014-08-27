@@ -4,6 +4,12 @@
 * We create an additional block group - makers - with specific functions for the Makers shield for arduino
 */
 
+SpriteMorph.prototype.makersIsBoardConnected = function() {
+    var sprite = this;
+
+    return ((sprite.arduino.board !== undefined) && (sprite.arduino.board.pins.length>0));
+}
+
 
 /**
 * We create areference to the origina Block definition following the same apporach as snap4arduino
@@ -81,27 +87,7 @@ function overridenBlockTemplates(category) {
     // which can trigger actions but are not used as programming blocks
     
 
-    /**
-     * Starts a connection attempt to an Arduino Board
-     */
-    var arduinoConnectButton = new PushButtonMorph(
-            null,
-            function () {
-                MakerApp.makersStartArduinoAutoConnect();
-            },
-            "Connect Arduino"
-    );
 
-    /**
-     * Starts disconnection from an Arduino Board
-     */
-    var arduinoDisConnectButton = new PushButtonMorph(
-            null,
-            function () {
-                MakerApp.makersStopArduinoAutoConnect();
-            },
-            "Disconnect Arduino"
-    );
 
     /**
      * Authorize twitter account (requests a PIN through a browser window)
@@ -109,32 +95,31 @@ function overridenBlockTemplates(category) {
     var tweetButton = new PushButtonMorph(
         null,
         function () {
-            MakerApp.twitter.requestPin()
-            .then(function() {
-                new MakerApp.twitter.TwitterDialogMorph(
-                    null,
-                    // Function executed after pin is given by the user
-                    function(pin) {
-                        MakerApp.twitter.processPin(pin)
-                        .then(function(res) {
-                            var msg = 'Successful authorization for Twitter account "'+res.screen_name+'".\n\n';
-                            msg += 'You may now send tweets (on behalf of "'+res.screen_name+'").'
-                            MakerApp.inform(msg);
-                        })
-                        .fail(function(error) {
-                            MakerApp.inform("Authorization failed");
-                        })
-                    }
-                ).prompt(
-                    "Twitter PIN",
-                    'PIN number you get from browser page' ,
-                    myself.world()
-                );
+            world.makers.twitter.requestPin(function(err, results) {
+                if (!err) {
+                    new world.makers.twitter.TwitterDialogMorph(
+                        null,
+                        // Function executed after pin is given by the user
+                        function(pin) {
+                            world.makers.twitter.processPin(pin, function(err, res) {
+                                if (!err) {
+                                    var msg = 'Successful authorization for Twitter account "'+res.screen_name+'".\n\n';
+                                    msg += 'You may now send tweets (on behalf of "'+res.screen_name+'").'
+                                    inform('Twitter', msg);
+                                } else {
+                                    inform('Twitter',"Authorization failed");
+                                }
+                            })
+                        }
+                    ).prompt(
+                        "Twitter PIN",
+                        'PIN number you get from browser page' ,
+                        myself.world()
+                    ); 
+                } else {
+                    inform('Twitter', "Could not connect to Twitter API, check Internet connectivity");
+                }
             })
-            .fail(function() {
-                MakerApp.inform("Could not connect to Twitter API, check Internet connevctivity");
-            });
-
 
         },
         "Authorize Twitter Account"
@@ -260,25 +245,12 @@ function overridenBlockTemplates(category) {
         return newBlock;
     }
 
-    // SriteMorph.prototype.makersNNN are used for updating information
-    // on "Watchers"  (Sprites displayed on stage to monitor values)
-    SpriteMorph.prototype.makersArduinoState = function () {
-        var state;
-
-        if (MakerApp.connecting) {
-            state = "connecting";
-        } else if (MakerApp.isBoardConnected()) {
-            state = "connected";
-        } else {
-            state = "disconnected";
-        }
-
-        return (state);
-    };
 
     SpriteMorph.prototype.makersTemperature = function () {
-        var board = this.arduino.board;
-        if (MakerApp.isBoardConnected()) {
+        var sprite = this;
+
+        var board = sprite.arduino.board;
+        if (sprite.makersIsBoardConnected()) {
             var val;
             var pin = 3;
 
@@ -286,15 +258,17 @@ function overridenBlockTemplates(category) {
                 board.pinMode(board.analogPins[pin],board.MODES.ANALOG);
             }
             val =  board.pins[board.analogPins[pin]].value;
-            return MakerApp.convertAnalogMeasure.temperatureLW35(val);
+            return world.makers.convertAnalogMeasure.temperatureLW35(val);
         } else {
             return null;
         }
     };
 
     SpriteMorph.prototype.makersLight = function () {
-        var board = this.arduino.board;
-        if (MakerApp.isBoardConnected()) {
+        var sprite = this;
+
+        var board = sprite.arduino.board;
+        if (sprite.makersIsBoardConnected()) {
 
             var val;
             var pin = 2;
@@ -303,7 +277,7 @@ function overridenBlockTemplates(category) {
                 board.pinMode(board.analogPins[pin],board.MODES.ANALOG);
             }
             val =  board.pins[board.analogPins[pin]].value;
-            return MakerApp.convertAnalogMeasure.light(val);
+            return world.makers.convertAnalogMeasure.light(val);
         } else {
             return null;
         }
@@ -311,8 +285,10 @@ function overridenBlockTemplates(category) {
     };
 
     SpriteMorph.prototype.makersAudio = function () {
-        var board = this.arduino.board;
-        if (MakerApp.isBoardConnected()) {
+        var sprite = this;
+
+        var board = sprite.arduino.board;
+        if (sprite.makersIsBoardConnected()) {
 
             var val;
             var pin = 0;
@@ -321,7 +297,7 @@ function overridenBlockTemplates(category) {
                 board.pinMode(board.analogPins[pin],board.MODES.ANALOG);
             }
             val =  board.pins[board.analogPins[pin]].value;
-            return MakerApp.convertAnalogMeasure.audio(val);
+            return world.makers.convertAnalogMeasure.audio(val);
         } else {
             return null;
         }
@@ -329,8 +305,10 @@ function overridenBlockTemplates(category) {
     };
 
     SpriteMorph.prototype.makersPotentiometer = function () {
-        var board = this.arduino.board;
-        if (MakerApp.isBoardConnected()) {
+        var sprite = this;
+
+        var board = sprite.arduino.board;
+        if (sprite.makersIsBoardConnected()) {
 
             var val;
             var pin = 1;
@@ -339,7 +317,7 @@ function overridenBlockTemplates(category) {
                 board.pinMode(board.analogPins[pin],board.MODES.ANALOG);
             }
             val =  board.pins[board.analogPins[pin]].value;
-            return MakerApp.convertAnalogMeasure.potentiometer(val);
+            return world.makers.convertAnalogMeasure.potentiometer(val);
         } else {
             return null;
         }
@@ -347,12 +325,6 @@ function overridenBlockTemplates(category) {
     };
 
     if (category === 'makers') {
-        blocks.push(arduinoConnectButton);
-        blocks.push(arduinoDisConnectButton);
-        blocks.push(watcherToggle('makersArduinoState'));
-        blocks.push(blockBySelector('makersArduinoState'));
-        blocks.push(blockBySelector('makersIsConnectedArduino'));
-        blocks.push('-');
         blocks.push(blockBySelector('makersLedOn'));
         blocks.push(blockBySelector('makersLedOff'));
         blocks.push(blockBySelector('makersBuzzer'));
@@ -370,16 +342,6 @@ function overridenBlockTemplates(category) {
         blocks.push('-');
         blocks.push(tweetButton);
         blocks.push(blockBySelector('makersSendTweet'));
-
-        // Toggle (display) ArduinoState watcher
-        var arduinoStateInfo = SpriteMorph.prototype.blocks['makersArduinoState'];
-        myself.toggleWatcher(
-                    'makersArduinoState',
-                    localize(arduinoStateInfo.spec),
-                    myself.blockColor[arduinoStateInfo.category]
-                );
- 
-
 
     }
 

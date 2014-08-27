@@ -1,37 +1,12 @@
 'use strict';
 
-
-/**
- * Checks is there is a connected device (if there is a board object).
- */
-Process.prototype.makersIsConnectedArduino = function () {
-	return (MakerApp.isBoardConnected());
-};
-
-/**
- * Checks is there is a connected device (if there is a board object).
- */
-Process.prototype.makersArduinoState = function () {
-	var state;
-
-	if (MakerApp.connecting) {
-		state = "connecting";
-	} else if (MakerApp.isBoardConnected()) {
-		state = "connected";
-	} else {
-		state = "disconnected";
-	}
-
-	return (state);
-};
-
-
-
 /**
  * Turn on led on pin 13
  */
 Process.prototype.makersLedOn = function () {
-	if (MakerApp.isBoardConnected()) {
+    var sprite = this.homeContext.receiver;
+
+	if (sprite.makersIsBoardConnected()) {
 		this.digitalWrite(13,true);
 	} else {
 		throw new Error("Arduino not connected")
@@ -43,7 +18,9 @@ Process.prototype.makersLedOn = function () {
  * Turn off led on pin 13
  */
 Process.prototype.makersLedOff = function () {
-	if (MakerApp.isBoardConnected()) {
+    var sprite = this.homeContext.receiver;
+
+	if (sprite.makersIsBoardConnected()) {
 		this.digitalWrite(13,false);
 	} else {
 		throw new Error("Arduino not connected")
@@ -56,7 +33,9 @@ Process.prototype.makersLedOff = function () {
  * Gets potentiometer value (in scale of 1 to 100)
  */
 Process.prototype.makersPotentiometer = function () {
-	if (MakerApp.isBoardConnected()) {
+    var sprite = this.homeContext.receiver;
+
+	if (sprite.makersIsBoardConnected()) {
 		var val;
 
 		val = this.reportAnalogReading(1);
@@ -71,7 +50,9 @@ Process.prototype.makersPotentiometer = function () {
  * Gets temperature value (in Celcius degrees)
  */
 Process.prototype.makersTemperature = function () {
-	if (MakerApp.isBoardConnected()) {
+    var sprite = this.homeContext.receiver;
+
+	if (sprite.makersIsBoardConnected()) {
 		var val;
 
 		val = this.reportAnalogReading(3);
@@ -86,7 +67,9 @@ Process.prototype.makersTemperature = function () {
  * Gets light value (in scale of 1 to 100)
  */
 Process.prototype.makersLight = function () {
-	if (MakerApp.isBoardConnected()) {
+    var sprite = this.homeContext.receiver;
+
+	if (sprite.makersIsBoardConnected()) {
 		var val;
 
 		val = this.reportAnalogReading(2);
@@ -102,7 +85,9 @@ Process.prototype.makersLight = function () {
  * Gets potentiometer value (in scale of 1 to 100)
  */
 Process.prototype.makersAudio = function () {
-	if (MakerApp.isBoardConnected()) {
+    var sprite = this.homeContext.receiver;
+
+	if (sprite.makersIsBoardConnected()) {
 		var val;
 
 		val = this.reportAnalogReading(0);
@@ -120,7 +105,9 @@ Process.prototype.makersAudio = function () {
  * Sets signal level for the buzzer
  */
 Process.prototype.makersBuzzer = function(buzzlevel) {
-	if (MakerApp.isBoardConnected()) {
+    var sprite = this.homeContext.receiver;
+
+	if (sprite.makersIsBoardConnected()) {
 		this.setPinMode(6,['PWM']);
 		this.pwmWrite(6,buzzlevel);
 	} else {
@@ -133,7 +120,9 @@ Process.prototype.makersBuzzer = function(buzzlevel) {
  * Gets switch on/off state
  */
 Process.prototype.makersSwitch = function() {
-	if (MakerApp.isBoardConnected()) {
+    var sprite = this.homeContext.receiver;
+
+	if (sprite.makersIsBoardConnected()) {
 		var val;
 
 		val = this.reportDigitalReading(3);
@@ -201,12 +190,12 @@ Process.prototype.makersSetTwitterPin = function(oauth_verifier) {
 };
 
 Process.prototype.makersSendTweet = function(msg) {
-	if (MakerApp.twitter.accessToken !== undefined) {
-		MakerApp.twitter.twitterAPI.statuses('update', {
+	if (world.makers.twitter.accessToken !== undefined) {
+		world.makers.twitter.twitterAPI.statuses('update', {
 		        status: msg
 		    },
-		    MakerApp.twitter.accessToken,
-		    MakerApp.twitter.accessTokenSecret,
+		    world.makers.twitter.accessToken,
+		    world.makers.twitter.accessTokenSecret,
 		    function(error, data, response) {
 		        if (error) {
 		            console.log(error)
